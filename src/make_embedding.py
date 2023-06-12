@@ -24,7 +24,7 @@ class MakeDocumentEmbedding:
         self.document_data = self.load_document()
         self.split_document_data = self.text_splitter()
         self.faiss_db = self.make_embeddings()
-    
+
     def load_document(self):
         """load_document _summary_
 
@@ -57,3 +57,49 @@ class MakeDocumentEmbedding:
             raise ValueError("Please specify the path of the PDF file to be read.")
         document_data = loader.load()
         return document_data
+
+    def text_splitter(self):
+        """text_splitter _summary_
+
+        _extended_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
+        # Split by separator and merge by character count
+        if self.split_mode == "character":
+            # Create a CharacterTextSplitter object
+            text_splitter = CharacterTextSplitter(
+                chunk_size=self.chunk_size,
+                chunk_overlap=self.chunk_overlap,
+            )
+        # Recursively split until below the chunk size limit
+        elif self.split_mode == "recursive_character":
+            # Create a RecursiveCharacterTextSplitter object
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=self.chunk_size,
+                chunk_overlap=self.chunk_overlap,
+            )
+        elif self.split_mode == "nltk":
+            # Create a NLTKTextSplitter object
+            text_splitter = NLTKTextSplitter(
+                chunk_size=self.chunk_size,
+                chunk_overlap=self.chunk_overlap,
+            )
+        elif self.split_mode == "tiktoken":
+            # Create a CharacterTextSplitter object
+            text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
+                chunk_size=self.chunk_size,
+                chunk_overlap=self.chunk_overlap,
+            )
+        else:
+            raise ValueError("Please specify the split mode.")
+
+        return text_splitter.split_documents(self.document_data)
