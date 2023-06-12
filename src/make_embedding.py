@@ -9,7 +9,7 @@ from langchain.embeddings import OpenAIEmbeddings
 
 
 class MakeDocumentEmbedding:
-    """ _summary_
+    """MakeDocumentEmbedding _summary_
 
     _extended_summary_
     """
@@ -19,7 +19,7 @@ class MakeDocumentEmbedding:
         self.chunk_overlap = args.chunk_overlap
         self.file_path = args.file_path
         self.split_mode = args.split_mode
-        self.embedding = OpenAIEmbeddings()
+        self.embedding = OpenAIEmbeddings(openai_api_key=self.open_api)
 
         self.document_data = self.load_document()
         self.split_document_data = self.text_splitter()
@@ -114,11 +114,9 @@ class MakeDocumentEmbedding:
         _type_
             _description_
         """
-        # Create an OpenAIEmbeddings object
-        embeddings = OpenAIEmbeddings()
 
         # Create a FAISS object
-        faiss_db = FAISS.from_documents(self.document_data, embeddings)
+        faiss_db = FAISS.from_documents(self.document_data, self.embedding)
 
         return faiss_db
 
@@ -134,3 +132,22 @@ class MakeDocumentEmbedding:
         """
         # Save the FAISS object
         self.faiss_db.save_local(save_path)
+
+
+def make_emb(args):
+    make_document_embedding = MakeDocumentEmbedding(args)
+    if args.faiss_save_path:
+        make_document_embedding.save_embeddings(args.faiss_save_path)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--OPEN_API_KEY", type=str, default="")
+    parser.add_argument("--chunk_size", type=int, default=1000, help="Please specify the chunk_size for CharacterTextSplitter within a number less than or equal to 4096.")
+    parser.add_argument("--chunk_overlap", type=int, default=200, help="Please specify the chunk_overlap for CharacterTextSplitter within a number less than or equal to 4096.")
+    parser.add_argument("--file_path", type=str, default="", help="Please specify the path of the article to be read. (pdf, docx, md)")
+    parser.add_argument("--split_mode", type=str, default="recursive_character", help="Please specify the split mode. (character, recursive_character, nltk, tiktoken)")
+    parser.add_argument("--faiss_save_path", type=str, default="faiss_index", help="Please specify the name of the created Faiss object.")
+    args = parser.parse_args()
+
+    make_emb(args)
