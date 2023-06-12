@@ -103,3 +103,34 @@ class MakeDocumentEmbedding:
             raise ValueError("Please specify the split mode.")
 
         return text_splitter.split_documents(self.document_data)
+
+    def make_embeddings(self):
+        """make_embeddings _summary_
+
+        _extended_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        # Create an OpenAIEmbeddings object
+        embeddings = OpenAIEmbeddings()
+
+        # Create a FAISS object
+        faiss_db = FAISS.from_documents(self.document_data, embeddings)
+
+        return faiss_db
+
+    def save_embeddings(self, save_path):
+        """save_embeddings _summary_
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        save_path : _type_
+            _description_
+        """
+        # Save the FAISS object
+        self.faiss_db.save_local(save_path)
